@@ -23,34 +23,55 @@ body {
 
 /* ---------------- NAV TABS ---------------- */
 .tabs {
-  display: flex;
+  /* display: flex;
   gap: 8px;
   background: var(--card);
   padding: 12px;
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   margin: 15px;
+  flex-wrap: wrap; */
+  display: flex;
+  gap: 1rem;
+  /* background: var(--card); */
+  padding: 12px;
+  /* border-radius: var(--radius); */
+  /* box-shadow: var(--shadow); */
+  margin: 15px;
   flex-wrap: wrap;
+  background-color: #4d148c;
 }
 
 .tab {
-  padding: 6px 12px;
+  /* padding: 6px 12px;
   font-size: 12px;
   background: #ededed;
   border-radius: 6px;
   cursor: pointer;
+  transition: 0.2s ease; */
+  padding: 6px 12px;
+  font-size: 12px;
+  /* background: #ededed; */
+  border-radius: 6px;
+  cursor: pointer;
   transition: 0.2s ease;
+  color: white !important;
+  font-size: 16px;
+  font-weight: 600;
 }
 
 .tab:hover {
-  background: #dcdcdc;
+  /* background: #dcdcdc; */
+  background: linear-gradient(45deg, #ff6600, #ffb74d);
+  color: white !important;
 }
 
 .tab.orange {
-  background: linear-gradient(45deg, #ff6600, #ffb74d);
-  color: white;
+  /* background: linear-gradient(45deg, #ff6600, #ffb74d);
+  color: white; */
   font-weight: 600;
   border: none;
+  color: #ff6600;
 }
 a {
   text-decoration: none;
