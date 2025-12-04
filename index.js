@@ -18,11 +18,19 @@ document.addEventListener("change", function (e) {
     notes.value = "OK. Proceed to next step.";
     notes.style.border = "1px solid green";
     notes.style.color = "green";
+    setTimeout(() => {
+      notes.style.border = "1px solid #d1d1d1";
+      notes.style.color = "green";
+    }, 1200);
     showPopup("Item Approved ✅");
   } else if (e.target.value === "no") {
     notes.value = "This action will REJECT the shipment.";
     notes.style.border = "1px solid red";
     notes.style.color = "red";
+    setTimeout(() => {
+      notes.style.border = "1px solid #d1d1d1";
+      notes.style.color = "red";
+    }, 1200);
     showPopup("Item Rejected ❌");
   }
   checkShipmentStatus();
