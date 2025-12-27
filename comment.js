@@ -12,53 +12,19 @@ const editBtn = document.getElementById("edit");
 const editInput = document.getElementById("editInput");
 
 //////////////////////////
-// Counter with localStorage
-//////////////////////////
-function counter() {
-  //  Initialize from localStorage if exists
-  let num = parseInt(localStorage.getItem("copyCount")) || 0;
+//  localStorage with logs//////////
+let logs = [];
 
-  // Helper to sync to localStorage
-  const saveToStorage = () => {
-    localStorage.setItem("copyCount", num);
-  };
+const store = localStorage.getItem("inputLogs");
 
-  return {
-    increment() {
-      num++;
-      saveToStorage();
-      return num;
-    },
-    decrement() {
-      num = Math.max(0, num - 1);
-      saveToStorage();
-      return num;
-    },
-    reset() {
-      num = 0;
-      saveToStorage();
-      return num;
-    },
-    value() {
-      return num;
-    },
-    edit(newNum) {
-      if (typeof newNum === "number" && newNum >= 0) {
-        num = newNum;
-        saveToStorage();
-        return num;
-      } else {
-        console.warn("Invalid value — must be a positive number");
-        return num;
-      }
-    },
-  };
+try {
+  const parse = JSON.parse(store);
+  if (Array.isArray(parse)) {
+    logs = parse;
+  }
+} catch (e) {
+  logs = [];
 }
-
-const counts = counter();
-
-// ✅ Set initial display from stored value
-counterDisplay.textContent = `Copied: ${counts.value()} times`;
 
 //////////////////////////
 // Event Listeners
@@ -66,12 +32,19 @@ counterDisplay.textContent = `Copied: ${counts.value()} times`;
 
 submit.addEventListener("click", async () => {
   const result = input.value.trim().replace(/\./g, "");
-  Hscode.textContent = `HTS CODE : ${result} ` || "No code entered";
+  if (result === "") {
+    alert("Please Enter HTS Code");
+  }
+  Hscode.textContent = `Tarrif: ${result} ` || "No code entered";
+  Hscode.classList.add("preview");
   input.value = "";
-  Hscode.style.color = "#4D148C";
-  Hscode.style.fontSize = "18px";
-  Hscode.style.justifyContent = "center";
-  setTimeout(() => (Hscode.style.transform = "scale(1)"), 400);
+  Hscode.style.letterSpacing = "1px";
+  setTimeout(
+    () => (
+      (Hscode.style.transform = "scale(1)"), (Hscode.style.color = "blue")
+    ),
+    200
+  );
   const Hscodes = result;
   try {
     await navigator.clipboard.writeText(Hscodes).then(() => {
@@ -98,9 +71,10 @@ decrementBtn.addEventListener("click", () => {
 procComment.addEventListener("click", function () {
   const previewHold = document.getElementById("previewHold");
   const entry = entryInput.value.trim();
-  preview = `${entry} - Shipment is on hold`;
+  preview = `Shipment in use - ${entry} - 7501PROC`;
   navigator.clipboard.writeText(`${entry} - Shipment is on hold`);
   previewHold.textContent = preview;
+  previewHold.classList.add("preview");
 });
 
 editBtn.addEventListener("click", () => {
@@ -109,46 +83,29 @@ editBtn.addEventListener("click", () => {
   counterDisplay.textContent = `Copied: ${updated} times`;
   editInput.value = "";
 });
+///////////////////////////Exit ///////////////////////////////
+
+const exitInput = document.getElementById("inputExit");
+const exitBtn = document.getElementById("exitBtn");
+
+exitBtn.addEventListener("click", async function () {
+  if (entryInput.value === " ") {
+    alert("Please Add Reason for Exit");
+    return;
+  }
+  const input = exitInput.value.trim(" ");
+  const inputText = `Exit - ${input} - 7501 PROC`;
+  const preview = document.getElementById("exitsPreview");
+  preview.textContent = inputText;
+  preview.classList.add("preview");
+  try {
+    await navigator.clipboard.writeText(inputText);
+  } catch (err) {
+    alert(`please find error Massesge ${err}`);
+  }
+});
 
 //////////////////Dropdown ///////////////////////////
-const getDozen = document.getElementById("getDozen");
-const getGross = document.getElementById("getGross");
-const container = document.getElementById("unit-converter");
-
-getDozen.addEventListener("click", async () => {
-  const inputDozen = document.getElementById("unitInput");
-  const input = inputDozen.value;
-
-  const dozenvalue = input / 12;
-  const preview = document.getElementById("previewDozen");
-  preview.textContent = dozenvalue.toFixed(2);
-
-  inputDozen.value = "";
-
-  try {
-    await navigator.clipboard.writeText(preview);
-  } catch (err) {
-    alert(`please find error Massesge ${err}`);
-  }
-});
-
-getGross.addEventListener("click", async () => {
-  const inputDozen = document.getElementById("unitInput");
-  const preview = document.getElementById("previewGross");
-
-  const input = inputDozen.value;
-
-  const dozenvalue = input / 10;
-  preview.textContent = dozenvalue.toFixed(2);
-
-  inputDozen.value = "";
-
-  try {
-    await navigator.clipboard.writeText(preview);
-  } catch (err) {
-    alert(`please find error Massesge ${err}`);
-  }
-});
 
 //////////// Commeting section ./////////////////
 
@@ -156,14 +113,84 @@ const commentSeven = document.getElementById("commentSeven");
 const indexComplete = document.getElementById("indexComplete");
 
 // Indexing Completed shipements //////////
+const siFormal = document.getElementById("siFormal");
+siFormal.addEventListener("click", async () => {
+  const input = document.getElementById("indexShips");
+  const newValue = input.value;
+  const previewIndex = document.getElementById("previewIndex");
+  const text = `${newValue} SI FORMAL - Index`;
+  input.value = "";
+
+  previewIndex.innerHTML = `<div>${text}</div>
+    <div>
+        <div>ENTRY TYPE :<span style = "font-weight:bold","color:red"> UNASSIGNED </span></div>
+        <div s>ATTRIBUTE: <span style = "font-weight:bold","color:red>DISSELECT ANY </span></div>
+        <div>CAGE CODE : <span style = "font-weight:bold","color:red>CODE ONE </span></div>
+        <div>PROCESSING FLAG : <span style = "font-weight:bold","color:red>FLAG ONE </span></div>
+    </div>`;
+  previewIndex.classList.add("preview");
+  try {
+    const text = "SI inFORMAL - Index";
+    await navigator.clipboard.writeText(text);
+  } catch (err) {
+    console.error("Failed to copy:", err);
+  }
+
+  const log = {
+    date: Date.now(),
+    action: text,
+    waight: 1,
+  };
+  logs.push(log);
+  localStorage.setItem("inputLogs", JSON.stringify(logs));
+  renderLogs();
+});
+siMulti.addEventListener("click", async () => {
+  const input = document.getElementById("indexShips");
+  const newValue = input.value;
+  const previewIndex = document.getElementById("previewIndex");
+  const text = `${newValue} SI MUTLI - Index`;
+  input.value = "";
+  previewIndex.innerHTML = `<div>${text}</div>
+    <div>
+        <div>ENTRY TYPE :<span style = "font-weight:bold","color:red"> UNASSIGNED </span></div>
+        <div s>ATTRIBUTE: <span style = "font-weight:bold","color:red>DISSELECT ANY </span></div>
+        <div>CAGE CODE : <span style = "font-weight:bold","color:red>CODE ONE </span></div>
+        <div>PROCESSING FLAG : <span style = "font-weight:bold","color:red>FLAG ONE </span></div>
+    </div>`;
+  previewIndex.classList.add("preview");
+  try {
+    const text = "SI MUTLI - Index";
+    await navigator.clipboard.writeText(text);
+  } catch (err) {
+    console.error("Failed to copy:", err);
+  }
+
+  const log = {
+    date: Date.now(),
+    action: text,
+    waight: 1,
+  };
+  logs.push(log);
+  localStorage.setItem("inputLogs", JSON.stringify(logs));
+  renderLogs();
+});
 
 indexComplete.addEventListener("click", async () => {
   const inputs = document.getElementById("indexShips");
   const newValue = inputs.value;
   const previewIndex = document.getElementById("previewIndex");
   const text = `${newValue} SI AUTO - Index`;
-  previewIndex.innerHTML = text;
-
+  previewIndex.innerHTML = `
+     <div>${text}</div>
+    <div>
+        <div>ENTRY TYPE :<span style = "font-weight:bold","color:red"> UNASSIGNED </span></div>
+        <div s>ATTRIBUTE: <span style = "font-weight:bold","color:red>DISSELECT ANY </span></div>
+        <div>CAGE CODE : <span style = "font-weight:bold","color:red>CODE ONE </span></div>
+        <div>PROCESSING FLAG : <span style = "font-weight:bold","color:red>FLAG ONE </span></div>
+    </div>`;
+  inputs.value = "";
+  previewIndex.classList.add("preview");
   try {
     const textConent = "SI AUTO - Index";
     await navigator.clipboard.writeText(textConent);
@@ -172,7 +199,7 @@ indexComplete.addEventListener("click", async () => {
   }
 
   const log = {
-    date: formatted,
+    date: Date.now(),
     action: text,
     waight: 1,
   };
@@ -184,24 +211,6 @@ indexComplete.addEventListener("click", async () => {
 
 const latestBtn = document.getElementById("commentSeven");
 
-let stored = localStorage.getItem("inputLogs");
-let logs = [];
-
-try {
-  const parse = JSON.parse(stored);
-  if (Array.isArray(parse)) {
-    logs = parse;
-  } else if (parse) {
-    logs = parse[parse];
-  } else {
-    logs = [];
-  }
-} catch {
-  logs = [];
-}
-
-const parsed = JSON.parse(stored);
-
 latestBtn.addEventListener("click", async () => {
   const inputs = document.getElementById("input75");
 
@@ -209,9 +218,10 @@ latestBtn.addEventListener("click", async () => {
     alert("please add Number");
     return;
   }
-  const preview = ` ${inputs.value} - Keyed 87/01 - 7501PROC`;
+  const preview = `${inputs.value} - Keyed 87/01 - 7501PROC`;
   const preview7501 = document.getElementById("preview7501");
   preview7501.textContent = preview;
+  preview7501.classList.add("preview");
   inputs.value = "";
   try {
     await navigator.clipboard.writeText(preview);
@@ -220,7 +230,7 @@ latestBtn.addEventListener("click", async () => {
   }
 
   const log = {
-    date: formatted,
+    date: Date.now(),
     action: preview,
     waight: 1,
   };
@@ -233,26 +243,27 @@ latestBtn.addEventListener("click", async () => {
 });
 
 /////////////////////////DATE GENRERATOR////////////////////////////////
-const d = new Date();
 
-const day = String(d.getDate()).padStart(2, "0");
-const month = String(d.getMonth() + 1).padStart(2, "0");
-const year = d.getFullYear();
+function formateDate(date) {
+  const d = new Date(date);
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth()).padStart(2, "0");
+  const year = String(d.getFullYear()).padStart(2, "0");
+  const hours = String(d.getHours()).padStart(2, "0");
+  const min = String(d.getMinutes()).padStart(2, "0");
+  // const second = String(d.getSeconds()).padStart("2 ,0");
 
-const hours = String(d.getHours()).padStart(2, "0");
-const minutes = String(d.getMinutes()).padStart(2, "0");
+  return `${day}/${month}/${year} ${hours}:${min}`;
+}
 
-let formatted = `${day}/${month}/${year} ${hours}:${minutes}`;
-////////////////////////////////FInish////////////////////////////////
-
-//////////////////////////Index REview Block///////////////////////////
+//////////////////////////Index Review Block///////////////////////////
 const indexReview = document.getElementById("btn-raviewTwo");
 
 indexReview.addEventListener("click", async () => {
   const dept = document.getElementById("deptTwo");
-  const task = document.getElementById("taskTwo");
+  // const task = document.getElementById("taskTwo");
 
-  const inputs = [dept, task];
+  const inputs = [dept];
   const Alllogs = [];
 
   inputs.forEach((items) => {
@@ -264,28 +275,59 @@ indexReview.addEventListener("click", async () => {
     Alllogs.push(...selected);
   });
   const addnText = document.getElementById("addComment").value;
-  const finalselect = `${Alllogs.join(" ")} ${addnText}`;
-  const preview = document.getElementById("preview");
+  if (Alllogs == "Manufacture information missing") {
+    const finalselect = `Review - ${Alllogs} - ${addnText} - Index `;
+    const preview = document.getElementById("preview");
+    // preview.textContent = `Review - ${finalselect} | ENTRY TYPE  To Select : SI | ATTRIBUTES  To Select : SIAUTO`;
+    preview.innerHTML = `
+     <div>${finalselect}</div>
+    <div>
+        <div>ENTRY TYPE :<span style = "font-weight:bold","color:red"> UNASSIGNED </span></div>
+        <div s>ATTRIBUTE: <span style = "font-weight:bold","color:red>DISSELECT ANY </span></div>
+        <div>CAGE CODE : <span style = "font-weight:bold","color:red>CODE ONE </span></div>
+        <div>PROCESSING FLAG : <span style = "font-weight:bold","color:red>FLAG ONE </span></div>
+    </div>`;
 
-  preview.textContent = finalselect;
+    try {
+      await navigator.clipboard.writeText(finalselect);
+      console.log("✅ Copied to clipboard:", finalselect);
+    } catch (err) {
+      alert("❌ Failed to copy: " + err);
+    }
 
-  // Copy to clipboard (fixed reference)
-  try {
-    await navigator.clipboard.writeText(finalselect);
-    console.log("✅ Copied to clipboard:", finalselect);
-  } catch (err) {
-    alert("❌ Failed to copy: " + err);
+    const log = {
+      date: Date.now(),
+      action: finalselect,
+      waight: 1,
+    };
+    console.log(log);
+    logs.push(log);
+    localStorage.setItem("inputLogs", JSON.stringify(logs));
+    renderLogs();
+  } else {
+    const finalselect = `Review - ${Alllogs} - ${addnText} - Index `;
+    const preview = document.getElementById("preview");
+    preview.textContent = finalselect;
+    preview.classList.add("preview");
+    try {
+      await navigator.clipboard.writeText(finalselect);
+      console.log("✅ Copied to clipboard:", finalselect);
+    } catch (err) {
+      alert("❌ Failed to copy: " + err);
+    }
+
+    const log = {
+      date: Date.now(),
+      action: finalselect,
+      waight: 1,
+    };
+    console.log(log);
+    logs.push(log);
+    localStorage.setItem("inputLogs", JSON.stringify(logs));
+    renderLogs();
   }
 
-  const log = {
-    date: formatted,
-    action: finalselect,
-    waight: 1,
-  };
-  console.log(log);
-  logs.push(log);
-  localStorage.setItem("inputLogs", JSON.stringify(logs));
-  renderLogs();
+  // Copy to clipboard (fixed reference)
 });
 ////////////////////////////////7501 Review Block///////////////////////////
 const Review7501 = document.getElementById("review7501");
@@ -307,19 +349,19 @@ Review7501.addEventListener("click", async () => {
   const newinputs = inputComment.value;
   console.log(newinputs);
   console.log(Alllogs);
-  const newSelect = `${Alllogs.join(" ")} ${newinputs}`;
+  const newSelect = `Review - ${Alllogs.join(" ")} ${newinputs} - 7501PROC`;
   const output = document.getElementById("output");
   output.textContent = newSelect;
+  output.classList.add("preview");
 
   // ✅ Copy to clipboard
   try {
     await navigator.clipboard.writeText(newSelect);
-    console.log("✅ Copied to clipboard:", newSelect);
   } catch (err) {
     alert("❌ Failed to copy: " + err);
   }
   const log = {
-    date: formatted,
+    date: Date.now(),
     action: newSelect,
     waight: 1,
   };
@@ -342,7 +384,7 @@ function renderLogs() {
       <div class='render-container'>
         <div class='table-items'>
           <div>${item.action}</div>
-          <div>${item.date}</div>
+          <div>${formateDate(item.date)}</div>
         </div>
         <div data-index="${index}" class="delete-btn">X</div>
       </div>
@@ -399,14 +441,60 @@ resetActivity.addEventListener("click", function () {
   // localStorage.removeItem("inputLogs");
   logs = [];
   renderLogs();
-  console.log("look");
+  localStorage.setItem("inputLogs", JSON.stringify(logs));
 });
 
 const departmentTasks = {
-  Department1: ["Task1", "Task2", "Task4", "Task3"],
-  Department2: ["Task11", "Task21", "Task41", "Task31"],
-  Department3: ["Task131", "Task221", "Task411", "Task300"],
-  Department4: ["Task1122", "Task5211", "Task4451", "Task3531"],
+  "Country of origin": ["Country code invalid"],
+
+  Description: [
+    "Better description required",
+    "Kit breakdown – multiple line request",
+  ],
+
+  "Document missing": [
+    "APHIS core processing / disclaimer required",
+    "MFG details needed",
+    "FDA document required",
+    "License information",
+    "Motor worksheet required",
+    "Invoice missing",
+    "ISF BOX",
+    "ADD/CVD missing",
+    "Ukraine sanction form",
+  ],
+
+  "Duplex error": [
+    "00477 Entry voided",
+    "CNEE profile built with temp tax-id must be keyed app 90 send to review",
+    "Manufacturers PWDBW not found",
+    "No release consignee selected",
+    "This needs to 90/G – No access",
+    "Invalid entry error",
+    "Built to manifest",
+    "ENTRY CAN NOT BE RESUMED. NOT IN PROPER STATUS",
+    "Tariff restricted",
+  ],
+
+  "Paper work": ["Invoice is not clear", "Need invoice in English language"],
+
+  Parties: [
+    "IMPNO consignee IRS no not found",
+    "IMPNO consignee PWDD no not found",
+    "Manufacturing details required for invoice textile description",
+    "BROKER INFO",
+    "Special instructions available in CCA",
+    "Special instruction available in SAP",
+    "Shipment for IRS",
+  ],
+
+  Value: ["Value mismatch between Jupiter and CI", "Value breakdown needed"],
+
+  Quantity: ["Unit of measurement missing"],
+
+  "Shipment contains diamond": ["1B to Handle"],
+
+  "Reason not listed": ["No sub reason"],
 };
 
 const dept = document.getElementById("dept");
@@ -416,7 +504,7 @@ const debug = document.getElementById("debug");
 
 dept.addEventListener("change", function () {
   const deptSelect = dept.value;
-  if (deptSelect === "") {
+  if (deptSelect === " ") {
     debug.textContent = "No department selected";
     return;
   }
@@ -427,8 +515,6 @@ dept.addEventListener("change", function () {
     option.textContent = opn;
     task.appendChild(option);
   });
-
-  console.log(deptSelect);
 });
 
 fetch("tariffData.json")
@@ -443,14 +529,16 @@ fetch("tariffData.json")
 
       if (searchTerm.length === 0) return;
 
-      const filtered = data.filter((item) =>
-        item.description.toLowerCase().includes(searchTerm)
+      const filtered = data.filter(
+        (item) =>
+          item.description.toLowerCase().includes(searchTerm) ||
+          item.hts_code.includes(searchTerm)
       );
 
       filtered.forEach((item) => {
         const div = document.createElement("div");
         div.textContent = `${item.description} - ${item.hts_code}`;
-
+        div.classList.add("preview");
         div.addEventListener("click", () => {
           tarrifinput.value = `${item.description} - ${item.hts_code}`;
           const hts = item.hts_code;
@@ -477,70 +565,144 @@ document.querySelectorAll(".tab").forEach((tab) => {
   }
 });
 
-////////////////////// ODD EVEN NUMBERS ////////////////////////////
+const activitySelect = document.getElementById("activitySelect");
 
-// const greetMassge = () => {
-//   console.log("hello world");
-// };
+activitySelect.addEventListener("change", () => {
+  confirm("are you sure want to Set Activity?");
+  const selectedActivity = activitySelect.value;
+  console.log("Selected activity:", selectedActivity);
+  console.log(Date.now());
 
-// greetMassge();
+  const log = {
+    action: selectedActivity,
+    date: Date.now(),
+    waight: 0,
+  };
+  console.log(log);
+  logs.push(log);
+  localStorage.setItem("inputLogs", JSON.stringify(logs));
+  renderLogs();
+});
 
-// const calAge = (ageyear, year) => {
-//   const ageOfUser = year - ageyear;
-//   console.log(ageOfUser);
-// };
+const idleLogs = document.getElementById("idleLogs");
+idleLogs.innerHTML = ""; // clear UI
 
-// calAge(2021, 2025);
+const IDLE = "Idle";
+const idleTime = 25; // 30 minutes in milliseconds
 
-// const getBio = (name, prof, organization, city) => {
-//   return `Hello, I'm ${name}. I am working as ${prof} in ${organization},${city}`;
-// };
-// console.log(getBio("faruk ", "dataAnalist", "tcs ", "pune"));
+for (let i = 0; i < logs.length - 1; i++) {
+  // console.log(formateDate(logs[i].date));
+  const diff = logs[i + 1].date - logs[i].date;
+  const holdtime = Math.floor(diff / 60000);
+  if (holdtime >= idleTime) {
+    const LogsRender = document.createElement("div");
+    LogsRender.innerHTML = `
+      <div class="idle-row">
+        <div class="task-name">${logs[i + 1].action}</div>
+        <div class="duration">${holdtime} min</div>
+        <div class="status">${IDLE}</div>
+      </div>`;
+    idleLogs.appendChild(LogsRender);
+  }
+}
 
-// const calculate = (x, y) => {
-//   const c = x + y;
-//   const d = c + x + y;
-//   console.log(d);
-//   innerfun = (amt) => {
-//     console.log(amt + d);
-//   };
-//   return innerfun;
-// };
+const IDLE_LIMIT_MIN = 25;
 
-// const funn = calculate(4, 5);
-// funn(3);
+document.getElementById("exportExcel").addEventListener("click", () => {
+  exportLogsToExcel(logs);
+});
 
-// const calculateFullAmount = (type, amount) => {
-//   let getPercent = 0.5;
+function exportLogsToExcel(logs) {
+  if (!logs || logs.length === 0) {
+    alert("No logs to export");
+    return;
+  }
 
-//   if (type === "food") {
-//     getPercent = 10;
-//   }
-//   if (type === "jwellary") {
-//     getPercent = 18;
-//   }
-//   if (type === "basicItem") {
-//     getPercent = 3;
-//   }
+  // Ensure date is timestamp & sort
+  const sortedLogs = logs
+    .map((log) => ({
+      ...log,
+      date: new Date(log.date).getTime(),
+    }))
+    .sort((a, b) => a.date - b.date);
 
-//   const getGSTAmount = () => {
-//     return amount * (getPercent / 100);
-//   };
+  /* ================= ALL LOGS SHEET ================= */
+  const allLogsSheet = sortedLogs.map((log, index) => ({
+    "Sr No": index + 1,
+    Action: log.action,
+    "Date & Time": new Date(log.date).toLocaleString(),
+  }));
 
-//   const getFinalAmout = () => {
-//     return amount + getGSTAmount();
-//   };
-//   return getFinalAmout();
-// };
+  /* ================= IDLE LOGS SHEET ================= */
+  const idleLogsSheet = [];
 
-// const biscuit = calculateFullAmount("food", 15000);
-// const salt = calculateFullAmount("basicItem", 1000);
-// const cloths = calculateFullAmount("", 10500);
-// const jwellary = calculateFullAmount("jwellary", 100000);
+  for (let i = 0; i < sortedLogs.length - 1; i++) {
+    const diffMs = sortedLogs[i + 1].date - sortedLogs[i].date;
+    const diffMin = Math.floor(diffMs / 60000);
 
-// console.log(
-//   biscuit.toFixed(),
-//   salt.toFixed(),
-//   cloths.toFixed(),
-//   jwellary.toFixed()
-// );
+    if (diffMin >= IDLE_LIMIT_MIN) {
+      idleLogsSheet.push({
+        "From Action": sortedLogs[i].action,
+        "To Action": sortedLogs[i + 1].action,
+        "Idle Duration (min)": diffMin,
+        "From Time": new Date(sortedLogs[i].date).toLocaleString(),
+        "To Time": new Date(sortedLogs[i + 1].date).toLocaleString(),
+      });
+    }
+  }
+
+  /* ================= EXCEL GENERATION ================= */
+  const workbook = XLSX.utils.book_new();
+
+  const wsAll = XLSX.utils.json_to_sheet(allLogsSheet);
+  const wsIdle = XLSX.utils.json_to_sheet(idleLogsSheet);
+
+  XLSX.utils.book_append_sheet(workbook, wsAll, "All Logs");
+  XLSX.utils.book_append_sheet(workbook, wsIdle, "Idle Logs");
+
+  XLSX.writeFile(workbook, "User_Activity_Logs.xlsx");
+}
+////////////////////// Unit Converstion//////////////////////////////////
+
+const convertBtn = document.getElementById("convertBtn");
+const unitSelect = document.getElementById("unitSelect");
+const inputUnit = document.getElementById("inputUnit");
+const previewUnit = document.getElementById("previewUnitConv");
+
+// function convertUnit() {
+//   convertBtn.addEventListener("click", function () {
+
+//   });
+// }
+
+unitSelect.addEventListener("change", function () {
+  const selectValue = unitSelect.value;
+
+  if (inputUnit.value.trim() === " ") {
+    alert("Please enter Value to Convert");
+    return;
+  }
+  if (selectValue === "Gross") {
+    const input = inputUnit.value;
+    const grossValue = input / 10;
+    navigator.clipboard.writeText(grossValue.toFixed(2));
+    previewUnit.innerHTML = grossValue.toFixed(2);
+    previewUnit.classList.add("preview");
+  } else if (selectValue === "Dozen") {
+    const dozen = inputUnit.value / 12;
+    navigator.clipboard.writeText(dozen.toFixed(2));
+    previewUnit.innerHTML = dozen.toFixed(2);
+    previewUnit.classList.add("preview");
+  } else if (selectValue === "Piece") {
+    const piece = inputUnit.value / 10;
+    navigator.clipboard.writeText(piece);
+    previewUnit.classList.add("preview");
+  } else if (selectValue === "Pair") {
+    const pair = inputUnit.value / 2;
+    navigator.clipboard.writeText(pair.toFixed(2));
+    previewUnit.textContent = pair.toFixed(2);
+    previewUnit.classList.add("preview");
+  }
+  inputUnit.value = "";
+  selectValue.value = "";
+});
